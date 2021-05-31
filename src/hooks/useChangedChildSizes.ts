@@ -28,7 +28,12 @@ function getChangedChildSizes(children: HTMLCollection, field: 'offsetHeight' | 
 
     const index = parseInt(child.dataset.index!)
     const knownSize = parseInt(child.dataset.knownSize!)
-    const size = child[field]
+    let size = child[field]
+    // If size is zero, we might be in a CSS Grid that's using `display: contents`
+    // on the Item and/or itemContent or both, so look up to 2 levels down for the 1st cell.
+    for (let i = 0, current = child.firstElementChild; i < 2 && size === 0 && current; i++, current = current.firstElementChild) {
+      size = (current as HTMLElement)[field]
+    }
 
     if (size === 0) {
       throw new Error('Zero-sized element, this should not happen')
